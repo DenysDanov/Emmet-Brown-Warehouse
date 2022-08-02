@@ -1,0 +1,42 @@
+
+header{
+    background-color: teal;
+    color:white;
+    display: flex;
+    margin: 0;
+    margin-bottom: 25px;
+    padding: 10px;
+}
+
+header>h3{
+    margin: 10px;
+}
+header>select{
+    appearance: none;
+    background-color: transparent;
+    border: none;
+    color: white;
+}
+
+header>a{
+    padding: 10px;
+    text-decoration: none;
+    color:white;
+    margin-left: 25px;
+}
+header>a:link{
+    color:white;
+}
+
+header>a:hover{
+    color:white;
+    background-color: turquoise;
+}
+
+header>a:active{
+    color:white;
+}
+
+.hidden{
+    display: none;
+}

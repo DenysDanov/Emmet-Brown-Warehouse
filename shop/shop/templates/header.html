@@ -1,0 +1,29 @@
+<header>
+    <h3>Emmet Brown Warehouse</h3>
+    <button id='cat_btn'>Категорії</button>
+    <div class="categories hidden" id='cat_wrp'>
+        {% for category in categories %}
+        <div class="category">
+            <a href="http://localhost/category/{{category.name}}">{{category.name}}</p>
+        </div>
+        {% endfor %}
+    </div>
+        
+            
+        
+    {% for item in menu %}
+    <a href="{{item.url}}" class="header_item">{{item.text}}</a>
+    {% endfor %} 
+    <script>
+        document.getElementById('cat_btn').onclick = () => {
+            let wrp = document.getElementById('cat_wrp');
+            
+            wrp.classList.remove('hidden')
+            setTimeout(()=>{
+                wrp.classList.add('hidden')
+            }, 20000)
+            
+            
+        }
+    </script>
+</header>

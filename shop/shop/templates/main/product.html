@@ -1,0 +1,13 @@
+{% extends "../base.html" %}
+{% block content %}
+<img src="http://localhost/media/{{ object.image }}" width="128px"  alt="">
+<p>{{object.name}}</p>
+<p>{{object.price}} грн.</p>
+<form action="http://localhost/addtocart/" method="post">
+    {% csrf_token %}
+    <input type="number" name="quantity" required id="">
+    <input type="hidden" name="prod_id" required value="{{object.id}}" id="">
+    <button type="submit">Замовити</button>
+</form>
+<p>{{object.descr}}</p>
+{% endblock %}

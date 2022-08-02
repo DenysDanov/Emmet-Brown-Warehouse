@@ -1,0 +1,21 @@
+{% extends "../base.html" %}
+{% block content %}
+    <dl id='cart'>
+        {% if cart%}
+        {% for product in cart %}
+        <dt class='cart_item'> 
+            <a href="product/{{product.id}}">{{ product.name }}</a>
+        </dt>
+        <dd>
+            {{product.quantity}} шт x {{ product.price }} грн.
+        </dd>
+        {% endfor %}
+        {% else %}
+        <p>У вас немає товарів у кошику :(</p>
+        {% endif %}
+    </dl>
+    <form action="order/" method="post">
+        {% csrf_token %}
+    <button type="submit">Замовити</button>
+    </form>
+{% endblock %}

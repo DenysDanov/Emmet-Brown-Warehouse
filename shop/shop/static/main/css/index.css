@@ -1,0 +1,14 @@
+.container{
+    display: flex;
+}
+
+.product{
+    max-width: 33%;
+    max-height: 250px;
+    margin:20px;
+}
+
+.product>img{
+    max-height: 150px;
+    max-width: 150px;
+}
