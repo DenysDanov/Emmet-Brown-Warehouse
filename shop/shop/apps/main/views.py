@@ -1,5 +1,5 @@
 from datetime import timedelta
-import json
+from django.db import models
 from django.views.generic import ListView, DetailView
 from django.http import HttpRequest
 from django.shortcuts import redirect, render
@@ -45,10 +45,13 @@ class ProductPage(DetailView):
         context['footer'] = footer
         return context
 
-class CategoryPage(DetailView):
+class CategoryPage(ListView):
     model = Category
-    pk_url_kwarg = 'cat_id'
+    pk_url_kwarg = 'id'
     template_name = 'main/category.html'
+
+    def get_queryset(self) -> models.query.QuerySet:
+        return Product.objects.filter(category=Category.objects.get(pk=self.kwargs.get('id')))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

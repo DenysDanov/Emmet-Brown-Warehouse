@@ -1,0 +1,7 @@
+{% for obj in object_list %}
+<div class="prod">
+    <p>{{obj.name}}</p>
+    <img src="http://localhost/media/{{ obj.image }}" width="128px"  alt="">
+    <p>{{obj.price}}</p>
+</div>
+{% endfor %}

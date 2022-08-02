@@ -2,7 +2,7 @@
 {% block content %}
     {% for obj in object_list %}
     <div class="product">
-        <img src="media/{{ obj.image }}" width="128px"  alt="">
+        <img src="http://localhost/media/{{ obj.image }}" width="128px"  alt="">
         <p>{{ obj.name }}</p>
         <p>{{ obj.short_descr }}</p>
         <a href="product/{{obj.id}}/">Детальніше</a>
