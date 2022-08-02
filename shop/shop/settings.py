@@ -151,3 +151,8 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
 ]
 }
+
+SMTP_USER = (os.environ.get('SMTP_USERNAME'),os.environ.get('SMTP_PASSWORD'))
+SMTP_APIKEY = os.environ.get('STMP_APIKEY')
+SMTP_SERVER = (os.environ.get('SMTP_SERVER'),os.environ.get('SMTP_PORT'))
+ADMIN_MAIL = 'denysdanov@gmail.com'
