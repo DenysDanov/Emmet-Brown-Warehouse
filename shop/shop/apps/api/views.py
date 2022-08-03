@@ -1,32 +1,35 @@
-import redis
+from django.http import HttpRequest
 
 from rest_framework import generics
-from rest_framework.views import APIView
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser
+from rest_framework.views import APIView
+
+from django.contrib.auth.models import User
+
 from django_filters.rest_framework import DjangoFilterBackend
 
-from main.models import Product, Category
 from main.cart import Cart
+from main.models import Product, Category
 from main.service import ReadOnly
-from .serializers import CategorySerializer, ProductSerializer
-
-
-r = redis.Redis()
-user_cart_store = redis.Redis(host='127.0.0.1', port=6379, db = 1)
+from .service import *
+from .serializers import CategorySerializer, ProductSerializer, UserSerializer
+from .redis_servers import *
 
 
 class ProductApiView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['name', 'id']
+    filterset_fields = ['name', 'id', 'category']
+    
     permission_classes = [IsAdminUser|ReadOnly]
 
 class ProductApiUpdate(generics.UpdateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [IsAdminUser|ReadOnly]
+    permission_classes = [IsAuthenticated]
 
 class ProductApiDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
@@ -38,8 +41,10 @@ class CategoryApiView(generics.ListAPIView):
     serializer_class = CategorySerializer
 
 class CartApiOrder(APIView):
-    def post(self, request):
-        Cart(r, request).order()
+    def post(self, request: HttpRequest):
+        Cart(r, id=user_cart_store.get(
+           get_user_id_by_token(get_token_from_request(request)) 
+        )).order()
         return Response({'success' : True})
 
 class CartApiView(APIView):
@@ -47,16 +52,27 @@ class CartApiView(APIView):
     permission_classes = [IsAdminUser|ReadOnly]
 
     def get(self, request):
-        cart = Cart(r, user_cart_store, request).getproducts()
+        cart = Cart(
+            id=request.data.get('cart'),
+            user=request.user
+
+        ).getproducts()
     
         return Response({
-            'main' :  cart
+            'id' : request.session.get('cart'),
+            'cart' :  cart
             })
+
     def post(self, request):
         try:
             prod_id = request.POST.get('prod_id')
             quantity = request.POST.get('quantity')
-            Cart(r, request).addproduct(prod_id, quantity).save()
+            Cart(
+                id=request.data.get('id')
+                ).addproduct(
+                    prod_id, quantity
+                    ).save()
+
         except Exception as e:
             return Response({
             'main' :  {
@@ -64,6 +80,7 @@ class CartApiView(APIView):
                 'error' : True  
                 }
             })
+
         else:
             return Response({
             'main' :  {
@@ -75,7 +92,9 @@ class CartApiView(APIView):
 
     def delete(self,request):
         try:
-            cart = Cart(r,request, id=request.data.get('cart_id')).delete()
+            cart = Cart(
+                id=request.data.get('cart')
+                ).delete()
         except Exception as e:
             return Response({
             'main' :  {
@@ -91,3 +110,6 @@ class CartApiView(APIView):
                 }
             })
         
+class UserApiView(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer

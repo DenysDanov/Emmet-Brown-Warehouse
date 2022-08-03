@@ -9,18 +9,20 @@ from django.conf import settings
 
 from .models import Product
 from .service import send_mail
+from api.redis_servers import *
 
 class Cart:
-    def __init__(self, r, user_cart_store: Redis, request = None, **kwargs) -> None:
-        
-        self.r : Redis = r
-        id = kwargs.get('id') or request.session.get('cart') or self.__generateid()      
-        self.__product_list = json.loads(self.r.get(id).decode()) if self.r.get(id) else {}
-        self.__id = id
-        # if request:
-        #     if request.user.is_authenticated:
-        #         if not user_cart_store.exists(request.user.id):
-        #             user_cart_store.mset({request.user.id: self.id})
+    def __init__(self, **kwargs) -> None:
+        self.__id = kwargs.get('id') or self.__generateid()
+        self.__product_list = json.loads(r.get(self.__id).decode()) if r.get(self.__id) else {}
+
+
+        if kwargs.get('user'):
+            if kwargs.get('user').is_authenticated:
+                if not user_cart_store.exists(kwargs.get('user').id):
+                    user_cart_store.mset(
+                        {kwargs.get('user').id: self.id}
+                        )
     
 
     def __getitem__(self, key : int):
@@ -41,7 +43,7 @@ class Cart:
         return cart
 
     def save(self):
-        self.r.mset({self.__id: json.dumps(self.__product_list)})
+        r.mset({self.__id: json.dumps(self.__product_list)})
         return self
 
     def addproduct(self, id, quantity):
@@ -59,9 +61,8 @@ class Cart:
 
     def order(self):
         c = self.getproducts()
-        self.r.expire(self.__id, timedelta(seconds=5))
+        r.expire(self.__id, timedelta(seconds=5))
         header = 'Нове замовлення '+ str(datetime.now())
-        print(c[0])
         r_c = [x['name'] + \
                 '; Кількість: ' + \
                 x['quantity'] + \
@@ -71,8 +72,6 @@ class Cart:
                 str(x['price']*int(x['quantity']))
                 for x in c]
         content = '\n'.join(r_c)
-        print(header)
-        print(content)
         send_mail(
             settings.SMTP_USER[0].replace('"', ''),
             settings.SMTP_USER[1].replace('"', ''),
@@ -94,7 +93,7 @@ class Cart:
         '''Генерує унікальний для множини sequence ідентифікатор'''
         while True:
             temp_id = ''.join([choice(string.ascii_lowercase) for x in range(length)])
-            if not self.r.exists(temp_id):
+            if not r.exists(temp_id):
                 
                 return temp_id
 

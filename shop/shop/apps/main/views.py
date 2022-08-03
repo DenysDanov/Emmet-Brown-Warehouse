@@ -7,8 +7,7 @@ from django.shortcuts import redirect, render
 from .service import allowed_methods
 from .models import Product, Category
 from .cart import Cart
-from api.views import r, user_cart_store
-import api.views as API
+from api.redis_servers import *
 
 
 # additional context
@@ -63,7 +62,7 @@ class CategoryPage(ListView):
 
 def cart(request : HttpRequest):
     return render(request, 'main/cart.html', {
-        'cart': Cart(r, user_cart_store, request).getproducts(),
+        'cart': Cart(request.session.get('cart')).getproducts(),
         'menu': menu,
         'title': 'Cart',
         'stylename': 'cart',
@@ -76,7 +75,7 @@ def addToCart(request : HttpRequest):
     try:
         prod_id = request.POST.get('prod_id')
         quantity = request.POST.get('quantity')
-        Cart(r, user_cart_store, request).addproduct(prod_id, quantity).save()
+        Cart(id=request.session.get('cart')).addproduct(prod_id, quantity).save()
         return redirect('/')
     except Exception as e:
         pass
@@ -84,5 +83,5 @@ def addToCart(request : HttpRequest):
 
 @allowed_methods('POST')
 def order(request : HttpRequest):
-    Cart(r, user_cart_store, request).order()
+    Cart(id=request.session.get('cart')).order()
     return redirect('..')

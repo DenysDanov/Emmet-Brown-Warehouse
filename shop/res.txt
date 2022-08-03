@@ -1,0 +1,1 @@
+b'[{"id":1,"name":"test_name","SKU":"1234","price":100,"descr":"str descr","short_descr":"str short_descr","category":1}]'
